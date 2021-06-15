@@ -1,0 +1,7 @@
+~/sfuhome/cmpt431/assignment2/test_scripts/ellipse_area_tester.py --execPath=/home/jsa306/sfuhome/cmpt431/assignment2/ellipse_area_parallel --scriptPath=/home/jsa306/sfuhome/cmpt431/assignment2/test_scripts/ellipse_area_evaluator.py
+
+scp -p 24 jsa306@cs-cloud.cs.surrey.sfu.ca
+scp -P 24 -r assignment2/ jsa306@cs-cloud.cs.surrey.sfu.ca:/home/jsa306/
+
+
+~/sfuhome/cmpt431/assignment2/test_scripts/ellipse_area_tester.py --execPath=/home/jsa306/sfuhome/cmpt431/assignment2/ellipse_area_parallel --scriptPath=/home/jsa306/sfuhome/cmpt431/assignment2/test_scripts/ellipse_area_evaluator.py
