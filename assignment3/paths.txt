@@ -1,1 +1,2 @@
 $ python scripts/page_rank_tester.pyc --execPath=. --scriptPath=scripts/page_rank_evaluator.pyc --inputPath=input_graphs/
+./page_rank_pull_parallel --nThreads 4 --nIterations 10 --inputFile ~/sfuhome/cmpt431/assignment3/input_graphs/web-Google
