@@ -20,7 +20,7 @@ typedef int64_t PageRankType;
 typedef double PageRankType;
 #endif
 
-pthread_mutex_t mymutex = PTHREAD_MUTEX_INITIALIZER;
+
 
 struct arguments{
   int max_iters;
@@ -31,6 +31,7 @@ struct arguments{
   int tid;
   CustomBarrier* barrier;
   int n_threads;
+  pthread_mutex_t* locks;
 };
 //remember to exam the input arguments
 void* pageRankParallel(void* arg){
@@ -50,9 +51,9 @@ void* pageRankParallel(void* arg){
       uintE out_degree = args->g->vertices_[u].getOutDegree();
       for (uintE i = 0; i < out_degree; i++) {
         uintV v = args->g->vertices_[u].getOutNeighbor(i);
-        pthread_mutex_lock(&mymutex);
+        pthread_mutex_lock(args->locks+v);
         args->pr_next[v] += (args->pr_curr[u] / (PageRankType) out_degree);
-        pthread_mutex_unlock(&mymutex);
+        pthread_mutex_unlock(args->locks+v);
       }
     }
     args->barrier->wait();
@@ -77,11 +78,14 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads) {
 
   pthread_t* pthreads = new pthread_t[n_threads];
   arguments* arrayArg = new arguments[n_threads];
+  pthread_mutex_t* locks = new pthread_mutex_t[n];
+
   CustomBarrier barrier(n_threads);
 
   for (uintV i = 0; i < n; i++) {
     pr_curr[i] = INIT_PAGE_RANK;
     pr_next[i] = 0.0;
+    pthread_mutex_init(locks+i,NULL);
   }
 
   // Push based pagerank
@@ -99,6 +103,7 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads) {
     arrayArg[i].tid = i;
     arrayArg[i].barrier = &barrier;
     arrayArg[i].n_threads = n_threads;
+    arrayArg[i].locks = locks;
     if(pthread_create(pthreads+i,NULL,pageRankParallel,arrayArg+i)!=0) throw std::runtime_error("Fail to create a new thread");
   }
   //std::cout<<"pthread create ends\n";
@@ -116,8 +121,6 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads) {
 
   time_taken = t1.stop();
   // -------------------------------------------------------------------
-  std::cout << "thread_id, time_taken" << std::endl;
-  std::cout << "0, " << time_taken << std::endl;
   // Print the above statistics for each thread
   // Example output for 2 threads:
   // thread_id, time_taken
@@ -132,7 +135,10 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads) {
   std::cout << "Time taken (in seconds) : " << time_taken << "\n";
   delete[] pr_curr;
   delete[] pr_next;
-  pthread_mutex_destroy(&mymutex);
+  delete[] pthreads;
+  delete[] arrayArg;
+  delete[] locks;
+
 }
 
 int main(int argc, char *argv[]) {
