@@ -32,7 +32,7 @@ struct arguments{
   int tid;
   CustomBarrier* barrier;
   int n_threads;
-  pthread_mutex_t* locks;
+  //pthread_mutex_t* locks;
 };
 //remember to exam the input arguments
 void* pageRankParallel(void* arg){
@@ -54,11 +54,11 @@ void* pageRankParallel(void* arg){
         uintV v = args->g->vertices_[u].getOutNeighbor(i);
         PageRankType oldValue = args->pr_next[v]->load();
         PageRankType update = (args->pr_curr[u] / (PageRankType) out_degree);
-        PageRankType newValue oldValue + update;
+        PageRankType newValue= oldValue + update;
         //pthread_mutex_lock(args->locks+v);
-        while(!args->pr_next[v]->compare_exchange_weak(oldValue,newValue,memory_order_relaxed){
+        while(!args->pr_next[v]->compare_exchange_weak(oldValue,newValue,std::memory_order_relaxed)){
           newValue = oldValue + update;
-        })
+        }
         //pthread_mutex_unlock(args->locks+v);
       }
     }
@@ -81,17 +81,18 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads) {
 
   PageRankType *pr_curr = new PageRankType[n];
   //PageRankType *pr_next = new PageRankType[n];
-  std::atomic<PageRankType> pr_next[n]={};
+  std::atomic<PageRankType>* pr_next= new std::atomic<PageRankType>[n];
 
   pthread_t* pthreads = new pthread_t[n_threads];
   arguments* arrayArg = new arguments[n_threads];
-  pthread_mutex_t* locks = new pthread_mutex_t[n];
+  //pthread_mutex_t* locks = new pthread_mutex_t[n];
 
   CustomBarrier barrier(n_threads);
 
   for (uintV i = 0; i < n; i++) {
     pr_curr[i] = INIT_PAGE_RANK;
-    pthread_mutex_init(locks+i,NULL);
+    pr_next[i].store(0.0);
+    //pthread_mutex_init(locks+i,NULL);
   }
 
   // Push based pagerank
@@ -109,7 +110,7 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads) {
     arrayArg[i].tid = i;
     arrayArg[i].barrier = &barrier;
     arrayArg[i].n_threads = n_threads;
-    arrayArg[i].locks = locks;
+    //arrayArg[i].locks = locks;
     if(pthread_create(pthreads+i,NULL,pageRankParallel,arrayArg+i)!=0) throw std::runtime_error("Fail to create a new thread");
   }
   //std::cout<<"pthread create ends\n";
@@ -140,10 +141,10 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads) {
   std::cout << "Sum of page ranks : " << sum_of_page_ranks << "\n";
   std::cout << "Time taken (in seconds) : " << time_taken << "\n";
   delete[] pr_curr;
-  //delete[] pr_next;
+  delete[] pr_next;
   delete[] pthreads;
   delete[] arrayArg;
-  delete[] locks;
+  //delete[] locks;
 
 }
 
