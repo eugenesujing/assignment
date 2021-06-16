@@ -31,7 +31,7 @@ struct arguments{
   int n_threads;
 };
 
-void pageRankParallel(void* arg){
+void* pageRankParallel(void* arg){
   arguments* args = (arguments*) arg;
   timer t1;
   uintV n = args->g->n_;
