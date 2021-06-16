@@ -165,7 +165,7 @@ int main(int argc, char *argv[]) {
     std::cout<<"Number of Threads should be non-negative\n";
     return 1;
   }
-  if(nIterations<1){
+  if(max_iterations<1){
     std::cout<<"Number of iterations should be non-negative\n";
     return 1;
   }
