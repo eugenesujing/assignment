@@ -58,7 +58,7 @@ void* pageRankParallel(void* arg){
             args->pr_next[v] += (args->pr_curr[u] / (PageRankType) u_out_degree);
       }
     }
-    //std::cout<<"before barrier tid: "<<args->tid<<std::endl;
+    
     args->barrier->wait();
     //std::cout<<"after barrier tid: "<<args->tid<<std::endl;
     for (uintV v = interval*args->tid; v < interval*args->tid +step; v++) {
