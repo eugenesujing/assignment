@@ -165,11 +165,11 @@ int main(int argc, char *argv[]) {
   uint max_iterations = cl_options["nIterations"].as<uint>();
   std::string input_file_path = cl_options["inputFile"].as<std::string>();
   if(n_threads<1){
-    std::cout<<"Number of Threads should be non-negative\n";
+    std::cout<<"Number of Threads should be positive\n";
     return 1;
   }
   if(max_iterations<1){
-    std::cout<<"Number of iterations should be non-negative\n";
+    std::cout<<"Number of iterations should be positive\n";
     return 1;
   }
 #ifdef USE_INT
