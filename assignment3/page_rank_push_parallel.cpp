@@ -20,6 +20,10 @@ typedef int64_t PageRankType;
 typedef double PageRankType;
 #endif
 
+struct nextE{
+  PageRankType pr_next;
+  pthread_mutex_t lock;
+}
 
 
 struct arguments{
@@ -27,11 +31,11 @@ struct arguments{
   double time;
   Graph * g;
   PageRankType* pr_curr;
-  PageRankType* pr_next;
+  nextE* nextElement;
   int tid;
   CustomBarrier* barrier;
   int n_threads;
-  pthread_mutex_t* locks;
+
 };
 //remember to exam the input arguments
 void* pageRankParallel(void* arg){
@@ -51,18 +55,18 @@ void* pageRankParallel(void* arg){
       uintE out_degree = args->g->vertices_[u].getOutDegree();
       for (uintE i = 0; i < out_degree; i++) {
         uintV v = args->g->vertices_[u].getOutNeighbor(i);
-        pthread_mutex_lock(args->locks+v);
-        args->pr_next[v] += (args->pr_curr[u] / (PageRankType) out_degree);
-        pthread_mutex_unlock(args->locks+v);
+        pthread_mutex_lock(&(args->nextElement[v].lock));
+        args->nextElement[v.]pr_next += (args->pr_curr[u] / (PageRankType) out_degree);
+        pthread_mutex_unlock(&(args->nextElement[v].lock));
       }
     }
     args->barrier->wait();
     for (uintV v = args->tid*interval; v < args->tid*interval + step; v++) {
-      args->pr_next[v] = PAGE_RANK(args->pr_next[v]);
+      args->nextElement[v].pr_next = PAGE_RANK(args->nextElement[v].pr_next);
 
       // reset pr_curr for the next iteration
-      args->pr_curr[v] = args->pr_next[v];
-      args->pr_next[v] = 0.0;
+      args->pr_curr[v] = args->nextElement[v].pr_next;
+      args->nextElement[v].pr_next = 0.0;
     }
     args->barrier->wait();
   }
@@ -74,18 +78,18 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads) {
   uintV n = g.n_;
 
   PageRankType *pr_curr = new PageRankType[n];
-  PageRankType *pr_next = new PageRankType[n];
 
+  nextE* nextElement = new nextE[n];
   pthread_t* pthreads = new pthread_t[n_threads];
   arguments* arrayArg = new arguments[n_threads];
-  pthread_mutex_t* locks = new pthread_mutex_t[n];
+  //pthread_mutex_t* locks = new pthread_mutex_t[n];
 
   CustomBarrier barrier(n_threads);
 
   for (uintV i = 0; i < n; i++) {
     pr_curr[i] = INIT_PAGE_RANK;
-    pr_next[i] = 0.0;
-    pthread_mutex_init(locks+i,NULL);
+    nextElement[i].pr_next = 0.0;
+    pthread_mutex_init(&(nextElement[i].lock),NULL);
   }
 
   // Push based pagerank
@@ -99,11 +103,10 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads) {
     arrayArg[i].max_iters = max_iters;
     arrayArg[i].g = &g;
     arrayArg[i].pr_curr=pr_curr;
-    arrayArg[i].pr_next=pr_next;
+    arrayArg[i].nextElement = nextElement;
     arrayArg[i].tid = i;
     arrayArg[i].barrier = &barrier;
     arrayArg[i].n_threads = n_threads;
-    arrayArg[i].locks = locks;
     if(pthread_create(pthreads+i,NULL,pageRankParallel,arrayArg+i)!=0) throw std::runtime_error("Fail to create a new thread");
   }
   //std::cout<<"pthread create ends\n";
@@ -134,10 +137,10 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads) {
   std::cout << "Sum of page ranks : " << sum_of_page_ranks << "\n";
   std::cout << "Time taken (in seconds) : " << time_taken << "\n";
   delete[] pr_curr;
-  delete[] pr_next;
+  delete[] nextElement;
   delete[] pthreads;
   delete[] arrayArg;
-  delete[] locks;
+  //delete[] locks;
 
 }
 
