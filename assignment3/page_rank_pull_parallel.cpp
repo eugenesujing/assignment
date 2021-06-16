@@ -36,7 +36,7 @@ void pageRankParallel(void* arg){
   timer t1;
   uintV n = args->g->n_;
   int interval = n/args->n_threads;
-  if(args->tid==n_threads-1){
+  if(args->tid==n->args->n_threads-1){
     interval += n/args->n_threads;
   }
   t1.start();
@@ -61,6 +61,7 @@ void pageRankParallel(void* arg){
     }
   }
   args->time = t1.stop();
+  pthread_exit(NULL);
 }
 
 void pageRankSerial(Graph &g, int max_iters, int n_threads) {
