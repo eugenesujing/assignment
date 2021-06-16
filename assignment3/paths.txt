@@ -1,0 +1,1 @@
+$ python scripts/page_rank_tester.pyc --execPath=. --scriptPath=scripts/page_rank_evaluator.pyc --inputPath=input_graphs/
