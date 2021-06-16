@@ -21,13 +21,13 @@ typedef int64_t PageRankType;
 typedef double PageRankType;
 #endif
 
-void pageRankParallel(int max_iters;
-double& time;
-Graph&  g;
-PageRankType& pr_curr;
-PageRankType& pr_next;
-int tid;
-CustomBarrier& barrier;
+void pageRankParallel(int max_iters,
+double& time,
+Graph&  g,
+PageRankType& pr_curr,
+PageRankType& pr_next,
+int tid,
+CustomBarrier& barrier,
 int n_threads){
 
   timer t1;
@@ -69,7 +69,7 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads) {
 
   std::vector<PageRankType> pr_curr(n,INIT_PAGE_RANK);
   std::vector<PageRankType> pr_next(n,0);
-  std::vector<double> time(n_threads);
+  std::vector<double> times(n_threads);
 
   std::vector<std::thread> threads;
   // Pull based pagerank
@@ -82,12 +82,12 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads) {
   t1.start();
 
   for(int i=0; i<n_threads; i++){
-    threads.push_back(std::thread(pageRankParallel,max_iters,time[i],g,pr_curr,pr_next,i,barrier,n_threads));
+    threads.push_back(std::thread(pageRankParallel,max_iters,times[i],g,pr_curr,pr_next,i,barrier,n_threads));
   }
   std::cout << "thread_id, time_taken" << std::endl;
   for(int j=0; j<n_threads; j++){
     threads[i].join();
-    std::cout<<j<<", "<<time[i]<<std::endl;
+    std::cout<<j<<", "<<times[i]<<std::endl;
   }
 
 
