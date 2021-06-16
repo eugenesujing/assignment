@@ -23,7 +23,7 @@ typedef double PageRankType;
 struct nextE{
   PageRankType pr_next;
   pthread_mutex_t lock;
-}
+};
 
 
 struct arguments{
@@ -56,7 +56,7 @@ void* pageRankParallel(void* arg){
       for (uintE i = 0; i < out_degree; i++) {
         uintV v = args->g->vertices_[u].getOutNeighbor(i);
         pthread_mutex_lock(&(args->nextElement[v].lock));
-        args->nextElement[v.]pr_next += (args->pr_curr[u] / (PageRankType) out_degree);
+        args->nextElement[v].pr_next += (args->pr_curr[u] / (PageRankType) out_degree);
         pthread_mutex_unlock(&(args->nextElement[v].lock));
       }
     }
