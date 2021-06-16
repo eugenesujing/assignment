@@ -56,7 +56,7 @@ void* pageRankParallel(void* arg){
         PageRankType update = (args->pr_curr[u] / (PageRankType) out_degree);
         PageRankType newValue= oldValue + update;
         //pthread_mutex_lock(args->locks+v);
-        while(!args->pr_next[v]compare_exchange_weak(oldValue,newValue,std::memory_order_relaxed)){
+        while(!args->pr_next[v].compare_exchange_weak(oldValue,newValue,std::memory_order_relaxed)){
           newValue = oldValue + update;
         }
         //pthread_mutex_unlock(args->locks+v);
