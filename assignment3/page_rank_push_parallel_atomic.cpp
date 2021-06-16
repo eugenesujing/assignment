@@ -52,11 +52,11 @@ void* pageRankParallel(void* arg){
       uintE out_degree = args->g->vertices_[u].getOutDegree();
       for (uintE i = 0; i < out_degree; i++) {
         uintV v = args->g->vertices_[u].getOutNeighbor(i);
-        PageRankType oldValue = args->pr_next[v]->load();
+        PageRankType oldValue = args->pr_next[v].load();
         PageRankType update = (args->pr_curr[u] / (PageRankType) out_degree);
         PageRankType newValue= oldValue + update;
         //pthread_mutex_lock(args->locks+v);
-        while(!args->pr_next[v]->compare_exchange_weak(oldValue,newValue,std::memory_order_relaxed)){
+        while(!args->pr_next[v]compare_exchange_weak(oldValue,newValue,std::memory_order_relaxed)){
           newValue = oldValue + update;
         }
         //pthread_mutex_unlock(args->locks+v);
@@ -106,7 +106,7 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads) {
     arrayArg[i].max_iters = max_iters;
     arrayArg[i].g = &g;
     arrayArg[i].pr_curr=pr_curr;
-    arrayArg[i].pr_next=&pr_next;
+    arrayArg[i].pr_next=pr_next;
     arrayArg[i].tid = i;
     arrayArg[i].barrier = &barrier;
     arrayArg[i].n_threads = n_threads;
