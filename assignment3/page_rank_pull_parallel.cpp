@@ -44,7 +44,8 @@ void* pageRankParallel(void* arg){
   //std::cout<<"n = "<<n<<std::endl;
   //std::cout<<"interval = "<<interval<<std::endl;
   //std::cout<<"begin iterations tid: "<<args->tid<<std::endl;
-  for (int iter = 0; iter < args->max_iters; iter++) {
+  int max_iters = args->max_iters;
+  for (int iter = 0; iter < max_iters; iter++) {
     // for each vertex 'v', process all its inNeighbors 'u'
     //std::cout<<"enter iterations tid: "<<args->tid<<std::endl;
     for (uintV v = interval*args->tid; v < interval*args->tid +step; v++) {
@@ -58,7 +59,7 @@ void* pageRankParallel(void* arg){
             args->pr_next[v] += (args->pr_curr[u] / (PageRankType) u_out_degree);
       }
     }
-    
+
     args->barrier->wait();
     //std::cout<<"after barrier tid: "<<args->tid<<std::endl;
     for (uintV v = interval*args->tid; v < interval*args->tid +step; v++) {
@@ -111,7 +112,7 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads) {
   std::cout << "thread_id, time_taken" << std::endl;
   for(int j=0; j<n_threads; j++){
     if(pthread_join(*(pthreads+j),NULL)!=0) throw std::runtime_error("Faile to join a thread");
-    
+
     std::cout << arrayArg[j].tid <<", "<< arrayArg[j].time << std::endl;
     // Print the above statistics for each thread
     // Example output for 2 threads:
