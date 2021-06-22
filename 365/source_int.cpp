@@ -5,7 +5,7 @@
 using namespace std;
 
 
-const int count = 100000;
+const int count = 1;
 
 class matrix_conversion{
 	
@@ -32,7 +32,7 @@ using sec = std::chrono::duration<double>;
 			
 		}
 		const sec duration = clock::now() - before;
-		cout << "It took " << duration.count() << "s for direct multiplication" << endl;
+		cout << "It took " << duration.count()/count << "s for direct multiplication" << endl;
 		return result;
 	}
 
@@ -54,7 +54,7 @@ using sec = std::chrono::duration<double>;
 			result[2]+=(temp1>>1);
 		}
 		const sec duration = clock::now() - before;
-		cout << "It took " << duration.count() << "s for lift_based calculation" << endl;
+		cout << "It took " << duration.count()/count << "s for lift_based calculation" << endl;
 		return result;
 	}
 
