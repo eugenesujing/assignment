@@ -119,11 +119,15 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads, int strategy) {
     }
     if(strategy==2){
       arrayArg[i].start = count;
-      while(total_assigned<(i+1)*(m/n_threads)){
-        total_assigned += g.vertices_[count].getOutDegree();
-        count++;
+      if(i==n_threads-1){
+        arrayArg[i].end = n;
+      }else{
+        while(total_assigned<(i+1)*(m/n_threads)){
+          total_assigned += g.vertices_[count].getInDegree();
+          count++;
+        }
+        arrayArg[i].end = count;
       }
-      arrayArg[i].end = count;
     }
     //arrayArg[i].locks = locks;
     if(pthread_create(pthreads+i,NULL,pageRankParallel,arrayArg+i)!=0) throw std::runtime_error("Fail to create a new thread");
