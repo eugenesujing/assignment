@@ -31,8 +31,8 @@ struct arguments{
   PageRankType* pr_curr;
   std::atomic<PageRankType>* pr_next;
   CustomBarrier* barrier;
-  int start;
-  int end;
+  uintV start;
+  uintV end;
   //pthread_mutex_t* locks;
 };
 //remember to exam the input arguments
@@ -99,10 +99,10 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads, int strategy) {
   // Create threads and distribute the work across T threads
   // -------------------------------------------------------------------
   t1.start();
-  int total_assigned = 0;
-  int count =0;
+  uintE total_assigned = 0;
+  uintV count =0;
 
-  int interval = n/n_threads;
+  uintV interval = n/n_threads;
   for(int i=0; i<n_threads;i++){
     arrayArg[i].max_iters = max_iters;
     arrayArg[i].g = &g;
@@ -110,7 +110,7 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads, int strategy) {
     arrayArg[i].pr_next=pr_next;
     arrayArg[i].barrier = &barrier;
     if(strategy ==1){
-      int step = interval;
+      uintV step = interval;
       if(i==n_threads-1){
         step+= n%n_threads;
       }
@@ -184,14 +184,17 @@ int main(int argc, char *argv[]) {
            {"strategy", "Strategy of decomposition and mapping",
              cxxopts::value<uint>()->default_value(
                  DEFAULT_STRATEGY)},
-      });
+           {"granularity", "Granularity of decomposition and mapping",
+             cxxopts::value<uint>()->default_value(
+                 DEFAULT_STRATEGY)},
+});
 
   auto cl_options = options.parse(argc, argv);
   uint n_threads = cl_options["nThreads"].as<uint>();
   uint max_iterations = cl_options["nIterations"].as<uint>();
   std::string input_file_path = cl_options["inputFile"].as<std::string>();
   uint strategy = cl_options["strategy"].as<uint>();
-
+  uint granularity = cl_options["granularity"].as<uint>();
   if(n_threads<1){
     std::cout<<"Number of Threads should be positive\n";
     return 1;
@@ -204,6 +207,11 @@ int main(int argc, char *argv[]) {
     std::cout<<"Strategy should be within the range [1,4]";
     return 1;
   }
+  if(strategy==4 && granularity<1){
+    std::cout<<"Granularity should be positive\n";
+    return 1;
+  }
+
 #ifdef USE_INT
   std::cout << "Using INT" << std::endl;
 #else
@@ -211,7 +219,9 @@ int main(int argc, char *argv[]) {
 #endif
   std::cout << std::fixed;
   std::cout << "Number of Threads : " << n_threads << std::endl;
-  std::cout << "Number of Iterations: " << max_iterations << std::endl;
+  std::cout << "Strategy : " << strategy << std::endl;
+  std::cout << "Granularity : " << granularity << std::endl;
+  std::cout << "Iterations : " << max_iterations << std::endl;
 
   Graph g;
   std::cout << "Reading graph\n";
