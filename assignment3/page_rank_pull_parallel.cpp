@@ -44,7 +44,7 @@ struct arguments{
 };
 
 uintV getNextVertexToBeProcessed(uintV granularity){
-  nexV =0;
+  nextV =0;
   return nextV.fetch_add(granularity);
 }
 
