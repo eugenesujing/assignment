@@ -23,7 +23,7 @@ typedef double PageRankType;
 #endif
 #define DEFAULT_STRATEGY "1"
 
-static std::atomic<uintV> nextV;
+static std::atomic<uintV> nextV(0);
 
 struct arguments{
   int max_iters;
@@ -41,6 +41,7 @@ struct arguments{
   double time_b1;
   double time_b2;
   double time_v;
+  int tid;
 };
 
 uintV getNextVertexToBeProcessed(uintV granularity){
@@ -60,6 +61,8 @@ void* pageRankParallel(void* arg){
   t1.start();
 
   //std::cout<<"n = "<<n<<std::endl;
+  //std::cout<<"strategy="<<args->strategy<<std::endl;
+  //std::cout<<"gran="<<args->granularity<<std::endl;
   //std::cout<<"interval = "<<interval<<std::endl;
   //std::cout<<"begin iterations tid: "<<args->tid<<std::endl;
   int max_iters = args->max_iters;
@@ -101,6 +104,7 @@ void* pageRankParallel(void* arg){
           t_v.start();
           uintV v = getNextVertexToBeProcessed(args->granularity);
           args->time_v += t_v.stop();
+          std::cout<<"v="<<v<<"  iter="<<iter<<"  tid="<<args->tid<<std::endl;
           if(v>=n) break;
           for(uintV j=0; j<args->granularity && v<n; j++){
             uintE in_degree = args->g->vertices_[v].getInDegree();
@@ -112,13 +116,26 @@ void* pageRankParallel(void* arg){
                   args->pr_next[v] += (args->pr_curr[u] / (PageRankType) u_out_degree);
             }
             v++;
+            if(v==916428){
+            std::cout<<"^^^^^^^^j="<<j<<std::endl;
+            std::cout<<"-------------v="<<v<<"  iter="<<iter<<"  tid="<<args->tid<<std::endl;
+            }
           }
 
 
         }
+        //std::cout<<"right before barrier 1\n";
+        
         t_b1.start();
         args->barrier->wait();
         args->time_b1 += t_b1.stop();
+        
+        if(nextV!=0){
+      	  nextV=0;
+      	  args->barrier->wait();
+        }else{
+        args->barrier->wait();
+        }
         //std::cout<<"after barrier tid: "<<args->tid<<std::endl;
 
           while(1){
@@ -138,6 +155,12 @@ void* pageRankParallel(void* arg){
           t_b2.start();
           args->barrier->wait();
           args->time_b1 += t_b2.stop();
+          if(nextV!=0){
+      	  nextV=0;
+      	  args->barrier->wait();
+        }else{
+        args->barrier->wait();
+        }
     }
 
   }
@@ -183,6 +206,7 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads, int strategy, int gr
     arrayArg[i].strategy = strategy;
     arrayArg[i].edgesProcessed = 0;
     arrayArg[i].verticesProcessed = 0;
+    arrayArg[i].tid=i;
     if(strategy ==1){
       uintV step = interval;
       if(i==n_threads-1){
@@ -202,15 +226,16 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads, int strategy, int gr
         }
         arrayArg[i].end = count;
       }
-    if(strategy==3){
+
+
+    }
+        if(strategy==3){
       arrayArg[i].granularity=1;
     }
     if(strategy ==4){
       arrayArg[i].granularity=granularity;
     }
-
-
-    }
+    //std::cout<<"gran in creating = "<<arrayArg[i].granularity<<std::endl;
     if(pthread_create(pthreads+i,NULL,pageRankParallel,arrayArg+i)!=0) throw std::runtime_error("Fail to create a new thread");
   }
   //std::cout<<"pthread create ends\n";
