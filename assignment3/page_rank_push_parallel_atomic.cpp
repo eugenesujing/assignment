@@ -29,46 +29,134 @@ struct arguments{
   double time;
   Graph * g;
   PageRankType* pr_curr;
-  std::atomic<PageRankType>* pr_next;
+  PageRankType* pr_next;
   CustomBarrier* barrier;
   uintV start;
   uintV end;
-  //pthread_mutex_t* locks;
+  int strategy;
+  int granularity;
+  uintE edgesProcessed;
+  uintV verticesProcessed;
+  double time_b1;
+  double time_b2;
+  double time_v;
+  int tid;
 };
+
+static std::atomic<uintV> nextV(0);
+uintV getNextVertexToBeProcessed(uintV granularity){
+  return nextV.fetch_add(granularity);
+}
 //remember to exam the input arguments
 void* pageRankParallel(void* arg){
   arguments* args = (arguments*) arg;
   timer t1;
   uintV n = args->g->n_;
-
+  args->time_v = 0;
+  args->time_b1 = 0;
+  args->time_b2 = 0;
+  timer t_v;
+  timer t_b1;
+  timer t_b2;
   t1.start();
-  int max_iters = args->max_iters;
-  for (int iter = 0; iter < max_iters; iter++) {
-    // for each vertex 'u', process all its outNeighbors 'v'
-    for (uintV u = args->start; u < args->end; u++) {
-      uintE out_degree = args->g->vertices_[u].getOutDegree();
-      for (uintE i = 0; i < out_degree; i++) {
-        uintV v = args->g->vertices_[u].getOutNeighbor(i);
-        PageRankType oldValue = args->pr_next[v].load();
-        PageRankType update = (args->pr_curr[u] / (PageRankType) out_degree);
-        PageRankType newValue= oldValue + update;
-        //pthread_mutex_lock(args->locks+v);
-        while(!args->pr_next[v].compare_exchange_weak(oldValue,newValue,std::memory_order_relaxed)){
-          newValue = oldValue + update;
-        }
-        //pthread_mutex_unlock(args->locks+v);
-      }
-    }
-    args->barrier->wait();
-    for (uintV v = args->start; v < args->end; v++) {
-      args->pr_next[v] = PAGE_RANK(args->pr_next[v]);
 
-      // reset pr_curr for the next iteration
-      args->pr_curr[v] = args->pr_next[v];
-      args->pr_next[v] = 0.0;
+  int max_iters = args->max_iters;
+  if(args->strategy==1 || args->strategy==2){
+    for (int iter = 0; iter < max_iters; iter++) {
+      // for each vertex 'u', process all its outNeighbors 'v'
+      for (uintV u = args->start; u < args->end; u++) {
+        uintE out_degree = args->g->vertices_[u].getOutDegree();
+        args->edgesProcessed += out_degree;
+        for (uintE i = 0; i < out_degree; i++) {
+          uintV v = args->g->vertices_[u].getOutNeighbor(i);
+          PageRankType oldValue = args->pr_next[v].load();
+          PageRankType update = (args->pr_curr[u] / (PageRankType) out_degree);
+          PageRankType newValue= oldValue + update;
+          //pthread_mutex_lock(args->locks+v);
+          while(!args->pr_next[v].compare_exchange_weak(oldValue,newValue,std::memory_order_relaxed)){
+            newValue = oldValue + update;
+          }
+          //pthread_mutex_unlock(args->locks+v);
+        }
+      }
+      t_b1.start();
+      args->barrier->wait();
+      args->time_b1 += t_b1.stop();
+      for (uintV v = args->start; v < args->end; v++) {
+        args->pr_next[v] = PAGE_RANK(args->pr_next[v]);
+        args->verticesProcessed ++;
+        // reset pr_curr for the next iteration
+        args->pr_curr[v] = args->pr_next[v];
+        args->pr_next[v] = 0.0;
+      }
+      t_b2.start();
+      args->barrier->wait();
+      args->time_b1 += t_b2.stop();
     }
-    args->barrier->wait();
+  }else{
+    for (int iter = 0; iter < max_iters; iter++) {
+      // for each vertex 'u', process all its outNeighbors 'v'
+      while(1) {
+        t_v.start();
+        uintV u = getNextVertexToBeProcessed(args->granularity);
+        args->time_v += t_v.stop();
+        if(u>=n) break;
+        for(int j=0; j <args->granularity; j++){
+          uintE out_degree = args->g->vertices_[u].getOutDegree();
+          args->edgesProcessed += out_degree;
+          for (uintE i = 0; i < out_degree; i++) {
+            uintV v = args->g->vertices_[u].getOutNeighbor(i);
+            PageRankType oldValue = args->pr_next[v].load();
+            PageRankType update = (args->pr_curr[u] / (PageRankType) out_degree);
+            PageRankType newValue= oldValue + update;
+            //pthread_mutex_lock(args->locks+v);
+            while(!args->pr_next[v].compare_exchange_weak(oldValue,newValue,std::memory_order_relaxed)){
+              newValue = oldValue + update;
+            }
+            //pthread_mutex_unlock(args->locks+v);
+          }
+        }
+
+      }
+      t_b1.start();
+      args->barrier->wait();
+      args->time_b1 += t_b1.stop();
+
+      if(nextV!=0){
+        nextV=0;
+        args->barrier->wait();
+      }else{
+      args->barrier->wait();
+      }
+      //std::cout<<"after barrier tid: "<<args->tid<<std::endl;
+
+        while(1){
+          t_v.start();
+          uintV v = getNextVertexToBeProcessed(args->granularity);
+          args->time_v += t_v.stop();
+          if(v>=n) break;
+          for(uintV j=0; j<args->granularity && v<n; j++){
+            args->verticesProcessed ++;
+            args->pr_next[v] = PAGE_RANK(args->pr_next[v]);
+
+            // reset pr_curr for the next iteration
+            args->pr_curr[v] = args->pr_next[v];
+            args->pr_next[v] = 0.0;
+            v++;
+          }
+        }
+        t_b2.start();
+        args->barrier->wait();
+        args->time_b1 += t_b2.stop();
+        if(nextV!=0){
+        nextV=0;
+        args->barrier->wait();
+      }else{
+      args->barrier->wait();
+      }
+    }  
   }
+
   args->time = t1.stop();
   pthread_exit(NULL);
 }
@@ -109,6 +197,10 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads, int strategy) {
     arrayArg[i].pr_curr=pr_curr;
     arrayArg[i].pr_next=pr_next;
     arrayArg[i].barrier = &barrier;
+    arrayArg[i].strategy = strategy;
+    arrayArg[i].edgesProcessed = 0;
+    arrayArg[i].verticesProcessed = 0;
+    arrayArg[i].tid=i;
     if(strategy ==1){
       uintV step = interval;
       if(i==n_threads-1){
@@ -123,21 +215,29 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads, int strategy) {
         arrayArg[i].end = n;
       }else{
         while(total_assigned<(i+1)*(m/n_threads)){
-          total_assigned += g.vertices_[count].getInDegree();
+          total_assigned += g.vertices_[count].getOutDegree();
           count++;
         }
         arrayArg[i].end = count;
       }
+
+
     }
-    //arrayArg[i].locks = locks;
+        if(strategy==3){
+      arrayArg[i].granularity=1;
+    }
+    if(strategy ==4){
+      arrayArg[i].granularity=granularity;
+    }
+    //std::cout<<"gran in creating = "<<arrayArg[i].granularity<<std::endl;
     if(pthread_create(pthreads+i,NULL,pageRankParallel,arrayArg+i)!=0) throw std::runtime_error("Fail to create a new thread");
   }
   //std::cout<<"pthread create ends\n";
-  std::cout << "thread_id, time_taken" << std::endl;
+  std::cout << "thread_id, num_vertices, num_edges, barrier1_time, barrier2_time, getNextVertex_time, total_time" << std::endl;
   for(int j=0; j<n_threads; j++){
     if(pthread_join(*(pthreads+j),NULL)!=0) throw std::runtime_error("Faile to join a thread");
 
-    std::cout << j <<", "<< arrayArg[j].time << std::endl;
+    std::cout << j <<", "<< arrayArg[j].verticesProcessed <<", "<< arrayArg[j].edgesProcessed<<", "<< arrayArg[j].time_b1<<", "<< arrayArg[j].time_b2<<", "<< arrayArg[j].time_v <<", "<< arrayArg[j].time<< std::endl;
     // Print the above statistics for each thread
     // Example output for 2 threads:
     // thread_id, time_taken
