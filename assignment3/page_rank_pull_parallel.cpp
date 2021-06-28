@@ -126,7 +126,7 @@ void* pageRankParallel(void* arg){
         t_b1.start();
         args->barrier->wait();
         args->time_b1 += t_b1.stop();
-        
+
         if(nextV!=0){
       	  nextV=0;
       	  args->barrier->wait();
@@ -257,7 +257,7 @@ void pageRankSerial(Graph &g, int max_iters, int n_threads, int strategy, int gr
   for (uintV u = 0; u < n; u++) {
     sum_of_page_ranks += pr_curr[u];
   }
-  std::cout << "Sum of page ranks : " << sum_of_page_ranks << "\n";
+  std::cout << "Sum of page rank : " << sum_of_page_ranks << "\n";
   std::cout << "Time taken (in seconds) : " << time_taken << "\n";
   delete[] pr_curr;
   delete[] pr_next;
@@ -317,7 +317,7 @@ int main(int argc, char *argv[]) {
      #endif
        std::cout << std::fixed;
        std::cout << "Number of Threads : " << n_threads << std::endl;
-       std::cout << "Strategy : " << strategy << std::endl;
+       std::cout << "Strategy: " << strategy << std::endl;
        std::cout << "Granularity : " << granularity << std::endl;
        std::cout << "Iterations : " << max_iterations << std::endl;
 
