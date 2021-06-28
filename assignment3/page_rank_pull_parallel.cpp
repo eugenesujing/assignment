@@ -104,8 +104,12 @@ void* pageRankParallel(void* arg){
           t_v.start();
           uintV v = getNextVertexToBeProcessed(args->granularity);
           args->time_v += t_v.stop();
-          std::cout<<"v="<<v<<"  iter="<<iter<<"  tid="<<args->tid<<std::endl;
-          if(v>=n) break;
+          
+          if(v>=n){
+            //std::cout<<"v="<<v<<"  iter="<<iter<<"  tid="<<args->tid<<std::endl;
+            break;
+          }
+          //int k=0;
           for(uintV j=0; j<args->granularity && v<n; j++){
             uintE in_degree = args->g->vertices_[v].getInDegree();
             args->edgesProcessed += in_degree;
@@ -116,12 +120,10 @@ void* pageRankParallel(void* arg){
                   args->pr_next[v] += (args->pr_curr[u] / (PageRankType) u_out_degree);
             }
             v++;
-            if(v==916428){
-            std::cout<<"^^^^^^^^j="<<j<<std::endl;
-            std::cout<<"-------------v="<<v<<"  iter="<<iter<<"  tid="<<args->tid<<std::endl;
-            }
+
           }
 
+          //std::cout<<"-------------k="<<k<<"  iter="<<iter<<"  tid="<<args->tid<<std::endl;
 
         }
         //std::cout<<"right before barrier 1\n";
@@ -150,6 +152,7 @@ void* pageRankParallel(void* arg){
               // reset pr_curr for the next iteration
               args->pr_curr[v] = args->pr_next[v];
               args->pr_next[v] = 0.0;
+              v++;
             }
           }
           t_b2.start();
