@@ -29,7 +29,7 @@ struct arguments{
   double time;
   Graph * g;
   PageRankType* pr_curr;
-  PageRankType* pr_next;
+  std::atomic<PageRankType>* pr_next;
   CustomBarrier* barrier;
   uintV start;
   uintV end;
@@ -154,14 +154,14 @@ void* pageRankParallel(void* arg){
       }else{
       args->barrier->wait();
       }
-    }  
+    }
   }
 
   args->time = t1.stop();
   pthread_exit(NULL);
 }
 
-void pageRankSerial(Graph &g, int max_iters, int n_threads, int strategy) {
+void pageRankSerial(Graph &g, int max_iters, int n_threads, int strategy, int granularity) {
   uintV n = g.n_;
   uintE m = g.m_;
 
@@ -327,7 +327,7 @@ int main(int argc, char *argv[]) {
   std::cout << "Reading graph\n";
   g.readGraphFromBinary<int>(input_file_path);
   std::cout << "Created graph\n";
-  pageRankSerial(g, max_iterations, n_threads, strategy);
+  pageRankSerial(g, max_iterations, n_threads, strategy,granularity);
 
   return 0;
 }
