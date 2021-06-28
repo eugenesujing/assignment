@@ -101,7 +101,7 @@ void* pageRankParallel(void* arg){
         uintV u = getNextVertexToBeProcessed(args->granularity);
         args->time_v += t_v.stop();
         if(u>=n) break;
-        for(int j=0; j <args->granularity; j++){
+        for(int j=0; j <args->granularity && u<n; j++){
           uintE out_degree = args->g->vertices_[u].getOutDegree();
           args->edgesProcessed += out_degree;
           for (uintE i = 0; i < out_degree; i++) {
@@ -115,6 +115,7 @@ void* pageRankParallel(void* arg){
             }
             //pthread_mutex_unlock(args->locks+v);
           }
+          u++;
         }
 
       }
