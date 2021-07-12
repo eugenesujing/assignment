@@ -13,6 +13,7 @@ struct Node
 template <class T>
 class OneLockQueue
 {
+public:
     Node<T>* q_head;
     Node<T>* q_tail;
     CustomAllocator my_allocator_;

@@ -138,6 +138,7 @@ struct ConsumerWithOutput
                 }
                 else
                 {
+                  std::cout<<my_queue.q_head->next<<std::endl;
                     break;
                 }
             }
@@ -199,7 +200,7 @@ int main(int argc, char *argv[])
     std::vector<ProducerWithInputs> producer_data;
     std::atomic<int> producers_finished;
     producers_finished.store(0);
-    
+
     // Setup consumers -------------------------------------------
     std::thread consumers[n_consumers];
     std::vector<ConsumerWithOutput> consumer_data;
@@ -223,7 +224,7 @@ int main(int argc, char *argv[])
         producer_data.push_back(ProducerWithInputs(i, &producers_finished, start, end, input_values));
         producers[i] = std::thread(producer_data[i]);
     }
-        
+
     // Start consumers --------------------------------------------
     // std::cout << "Creating consumers\n";
     for (int i = 0; i < n_consumers; ++i)
@@ -307,7 +308,7 @@ int main(int argc, char *argv[])
         std::cout << "Verification failed\n";
     }
 
-    // free 
+    // free
     for(int i = 0; i < n_consumers; i++)
     {
         consumer_data[i].del();
