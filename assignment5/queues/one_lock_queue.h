@@ -53,7 +53,7 @@ public:
           Node<T>* node = q_head;
           *value = q_head->next->value;
           q_head = q_head->next;
-          my_allocator.freeNode(node);
+          my_allocator_.freeNode(node);
           ret_value = true;
         }
         pthread_mutex_unlock(locks);
