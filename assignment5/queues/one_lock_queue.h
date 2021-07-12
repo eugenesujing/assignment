@@ -1,10 +1,10 @@
 #include "../common/allocator.h"
 #include <pthread.h>
 
-pthread_mutex_t* locks = new pthread_mutex_t[n];
+pthread_mutex_t* locks = new pthread_mutex_t;
 
 template <class T>
-class Node
+struct Node
 {
   T value;
   Node<T>* next;
@@ -35,7 +35,7 @@ public:
 
     void enqueue(T value)
     {
-      node = (Node<T>* )my_allocator.newNode();
+      Node<T>* node = (Node<T>* )my_allocator_.newNode();
       node->value = value;
       node->next = NULL;
       //Append to q_tail and update the queue
