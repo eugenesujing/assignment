@@ -138,7 +138,7 @@ struct ConsumerWithOutput
                 }
                 else
                 {
-                  std::cout<<my_queue.q_head->next<<std::endl;
+                  std::cout<<"q_head->next = "<<my_queue.q_head->next<<std::endl;
                     break;
                 }
             }
