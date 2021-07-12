@@ -1,7 +1,7 @@
 #include "../common/allocator.h"
 #include <pthread.h>
 
-pthread_mutex_t* locks = new pthread_mutex_t;
+static pthread_mutex_t* locks = new pthread_mutex_t;
 
 template <class T>
 struct Node
