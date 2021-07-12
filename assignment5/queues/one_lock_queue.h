@@ -1,6 +1,7 @@
 #include "../common/allocator.h"
 #include <pthread.h>
 
+static pthread_mutex_t* locks = new pthread_mutex_t;
 
 template <class T>
 struct Node
@@ -15,7 +16,6 @@ class OneLockQueue
     Node<T>* q_head;
     Node<T>* q_tail;
     CustomAllocator my_allocator_;
-    static pthread_mutex_t* locks;
 public:
     OneLockQueue() : my_allocator_()
     {
@@ -26,7 +26,6 @@ public:
         std::cout << "Using Allocator\n";
         my_allocator_.initialize(t_my_allocator_size, sizeof(Node<T>));
         // Initialize the queue head or tail here
-        locks = new pthread_mutex_t;
         Node<T>* newNode = (Node<T>*)my_allocator_.newNode();
         newNode->next = NULL;
         q_head = newNode;
@@ -63,7 +62,6 @@ public:
 
     void cleanup()
     {
-      delete locks;
         my_allocator_.cleanup();
     }
 };
