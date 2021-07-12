@@ -52,7 +52,7 @@ public:
         if(q_head->next!=NULL){
           Node<T>* node = q_head;
           *value = q_head->next->value;
-          q_head = q_head->next;
+          q_head = node->next;
           my_allocator_.freeNode(node);
           ret_value = true;
         }
