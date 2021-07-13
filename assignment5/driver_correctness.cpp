@@ -142,6 +142,7 @@ struct ConsumerWithOutput
                 else
                 {
                   std::cout<<"q_head->next = "<<my_queue.q_head->next<<std::endl;
+                  std::cout<<"q_tail->value = "<<my_queue.q_tail->value<<std::endl;
                   std::cout<<thread_id_<<"  finished(consumer) "<<std::endl;
                     break;
                 }
