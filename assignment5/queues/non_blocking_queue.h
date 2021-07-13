@@ -75,8 +75,11 @@ public:
                 if (next.address() == NULL) {
                   Node<T>* p = compute_ptr(node,next.count()+1);
                   pointer_t<Node<T>> to_be_swapped ={p};
-                    if(CAS(&tail.address()->next, next, to_be_swapped))
-                        break;
+                    if(CAS(&tail.address()->next, next, to_be_swapped)){
+                      std::cout<<"successfully enque "<<value<<std::endl;
+                      break;
+                    }
+
                 }
                 else{
                   Node<T>* p = compute_ptr(next.address(),tail.count()+1);
@@ -114,8 +117,11 @@ public:
                      *value = next.address()->value;
                      Node<T>* p = compute_ptr(next.address(),head.count()+1);
                      pointer_t<Node<T>> to_be_swapped ={p};
-                     if(CAS(&q_head, head, to_be_swapped))
-                         break;
+                     if(CAS(&q_head, head, to_be_swapped)){
+                       std::cout<<"successfully deque "<<*value<<std::endl;
+                       break;
+                     }
+
                  }
              }
          }
