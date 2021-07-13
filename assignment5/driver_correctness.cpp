@@ -63,8 +63,7 @@ struct ProducerWithInputs
     {
         timer t;
         t.start();
-        //std::cout<<thread_id_<<"  began "<<std::endl;
-         std::cout << "Start producing..\n";
+        // std::cout << "Start producing..\n";
         for (long i = start_; i < end_; i++)
         {
             my_queue.enqueue(inputs_[i]);
@@ -72,7 +71,6 @@ struct ProducerWithInputs
 
         *total_time_ = t.stop();
         producers_finished_->fetch_add(1);
-        std::cout<<thread_id_<<"  finished "<<std::endl;
     }
 
     void print()
@@ -123,8 +121,7 @@ struct ConsumerWithOutput
         t.start();
         int value = 0;
         long count = 0;
-         std::cout << "Start consuming..\n";
-        //std::cout<<thread_id_<<"  began(consumer) "<<std::endl;
+        // std::cout << "Start consuming..\n";
         while (true)
         {
             if (my_queue.dequeue(&value))
@@ -141,9 +138,6 @@ struct ConsumerWithOutput
                 }
                 else
                 {
-
-                  //std::cout<<"q_tail->value = "<<my_queue.q_tail->value<<std::endl;
-                  std::cout<<thread_id_<<"  finished(consumer) "<<std::endl;
                     break;
                 }
             }
@@ -244,7 +238,6 @@ int main(int argc, char *argv[])
         producers[i].join();
     }
     no_more_enqueues.store(true);
-    std::cout<<"store true"<<std::endl;
     for (int i = 0; i < n_consumers; ++i)
     {
         consumers[i].join();
