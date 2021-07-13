@@ -62,7 +62,7 @@ public:
         }
         *value = new_head->value;
         q_head = new_head;
-        pthread_mutex_unlock(locks);
+        pthread_mutex_unlock(lock2);
         my_allocator_.freeNode(node);
         return true;
     }
