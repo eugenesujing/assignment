@@ -17,7 +17,7 @@ class pointer_t{
     T* temp = ptr;
     return (uintptr_t)temp>>48;
   }
-}
+};
 
 
 
@@ -60,7 +60,7 @@ public:
     void enqueue(T value)
     {
         // Use LFENCE and SFENCE as mentioned in pseudocode
-        Node<T>* node = (Node<T>* )my_allocator.newNode();
+        Node<T>* node = (Node<T>* )my_allocator_.newNode();
         node->value = value;
         node->next.ptr = NULL;
         SFENCE;
@@ -116,7 +116,7 @@ public:
                  }
              }
          }
-         my_allocator.freeNode(head.address());
+         my_allocator_.freeNode(head.address());
          return TRUE;
     }
 
