@@ -6,7 +6,7 @@
 
 
 template <class T>
-class pointer_t{
+struct pointer_t{
   T* ptr;
   T* address(){
     T* temp = ptr;
