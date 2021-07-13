@@ -45,7 +45,7 @@ public:
       pthread_mutex_lock(&locks);
       q_tail->next = node;
       q_tail = node;
-      pthread_cond_signal(&empty);
+      wakeup_dq.store(true);
       pthread_mutex_unlock(&locks);
     }
 
@@ -57,27 +57,29 @@ public:
         Node<T>* new_head = node->next;
 
         while(new_head==NULL){
-          if(no_more_enqueues.load()==false){
-            std::cout<<"Start waiting"<<std::endl;
-            pthread_cond_wait(&empty,&locks);
-            std::cout<<"Stop waiting"<<std::endl;
+          // if(no_more_enqueues.load()==false){
+          //   std::cout<<"Start waiting"<<std::endl;
+          //   pthread_cond_wait(&empty,&locks);
+          //   std::cout<<"Stop waiting"<<std::endl;
+          // }
+          wakeup_dq.store(false);
+          pthread_mutex_unlock(&locks);
+          while(no_more_enqueues.load()==false && wakeup_dq.load()==false){
+
           }
+          pthread_mutex_lock(&locks);
           new_head = q_head->next;
           if(new_head!=NULL){
             node = q_head;
             wakeup_dq.store(true);
           }else if(no_more_enqueues.load()==true){
             pthread_mutex_unlock(&locks);
-            pthread_cond_signal(&empty);
             return false;
           }
 
         }
         *value = new_head->value;
         q_head = new_head;
-        if(no_more_enqueues.load()==true){
-          pthread_cond_signal(&empty);
-        }
         pthread_mutex_unlock(&locks);
         my_allocator_.freeNode(node);
         return true;
