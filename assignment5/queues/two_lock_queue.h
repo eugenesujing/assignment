@@ -68,8 +68,8 @@ public:
     }
     void cleanup()
     {
-      pthread_mutex_destroy(lock1);
-      pthread_mutex_destroy(lock2);
+      pthread_mutex_destroy(&lock1);
+      pthread_mutex_destroy(&lock2);
         my_allocator_.cleanup();
     }
 };
