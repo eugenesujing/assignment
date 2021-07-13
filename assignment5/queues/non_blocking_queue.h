@@ -73,7 +73,7 @@ public:
             LFENCE;
             if (&tail == &q_tail){
                 if (next.address() == NULL) {
-                  std::cout<<"enque here 1"<<std::end;
+                  std::cout<<"enque here 1"<<std::endl;
                   Node<T>* p = compute_ptr(node,next.count()+1);
                   pointer_t<Node<T>> to_be_swapped ={p};
                     if(CAS(&tail.address()->next, next, to_be_swapped)){
@@ -83,7 +83,7 @@ public:
 
                 }
                 else{
-                  std::cout<<"enque here 2"<<std::end;
+                  std::cout<<"enque here 2"<<std::endl;
                   Node<T>* p = compute_ptr(next.address(),tail.count()+1);
                   pointer_t<Node<T>> to_be_swapped ={p};
                     CAS(&q_tail, tail, to_be_swapped);	// ELABEL
@@ -109,7 +109,7 @@ public:
              LFENCE;
              if (&head == &q_head) {
                  if(head.address() == tail.address()) {
-                   std::cout<<"deque here 1"<<std::end;
+                   std::cout<<"deque here 1"<<std::endl;
                      if(next.address() == NULL)
                              return false;
                     Node<T>* p = compute_ptr(next.address(),tail.count()+1);
@@ -117,7 +117,7 @@ public:
                      CAS(&q_tail, tail, to_be_swapped);	//DLABEL
                  }
                  else {
-                   std::cout<<"deque here 1"<<std::end;
+                   std::cout<<"deque here 1"<<std::endl;
                      *value = next.address()->value;
                      Node<T>* p = compute_ptr(next.address(),head.count()+1);
                      pointer_t<Node<T>> to_be_swapped ={p};
