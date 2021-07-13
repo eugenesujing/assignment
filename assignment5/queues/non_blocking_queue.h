@@ -53,7 +53,7 @@ public:
     Node<T>* compute_ptr(Node<T>* node, uint16_t count){
       Node<T>* temp = node;
       const uintptr_t mask = ~(0ULL);
-      Node<T>* temp2 = (Node<T>*)(((uintptr_t)temp) | (count <<48));
+      Node<T>* temp2 = (Node<T>*)(((uintptr_t)temp) | ((uint64_t)count <<48));
       return temp2;
     }
 
@@ -64,28 +64,29 @@ public:
         node->value = value;
         node->next.ptr = NULL;
         SFENCE;
+        pointer_t<Node<T>> tail;
         while(true) {
-            pointer_t<Node<T>> tail = q_tail;
+            tail = q_tail;
             LFENCE;
             pointer_t<Node<T>> next = tail.address()->next;
             LFENCE;
             if (tail == q_tail){
                 if (next.address() == NULL) {
                   Node<T>* p = compute_ptr(node,next.count()+1);
-                  pointer_t to_be_swapped ={p};
+                  pointer_t<Node<T>> to_be_swapped ={p};
                     if(CAS(&tail.address()->next, next, to_be_swapped))
                         break;
                 }
                 else{
                   Node<T>* p = compute_ptr(next.address(),tail.count()+1);
-                  pointer_t to_be_swapped ={p};
+                  pointer_t<Node<T>> to_be_swapped ={p};
                     CAS(&q_tail, tail, to_be_swapped);	// ELABEL
                 }
             }
         }
         SFENCE;
         Node<T>* p = compute_ptr(node,tail.count()+1);
-        pointer_t to_be_swapped ={p};
+        pointer_t<Node<T>> to_be_swapped ={p};
         CAS(&q_tail, tail, to_be_swapped);
     }
 
@@ -104,13 +105,13 @@ public:
                      if(next.address() == NULL)
                              return FALSE;
                     Node<T>* p = compute_ptr(next.address(),tail.count()+1);
-                    pointer_t to_be_swapped ={p};
+                    pointer_t<Node<T>> to_be_swapped ={p};
                      CAS(&q_tail, tail, to_be_swapped);	//DLABEL
                  }
                  else {
                      *p_value = next.address()->value;
                      Node<T>* p = compute_ptr(next.address(),head.count()+1);
-                     pointer_t to_be_swapped ={p};
+                     pointer_t<Node<T>> to_be_swapped ={p};
                      if(CAS(&q_head, head, to_be_swapped))
                          break;
                  }
