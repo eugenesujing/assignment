@@ -1,7 +1,7 @@
 #include "../common/allocator.h"
 #include <pthread.h>
 
-pthread_mutex_t* locks = new pthread_mutex_t;
+pthread_mutex_t mymutex = PTHREAD_MUTEX_INITIALIZER;
 
 template <class T>
 struct Node
@@ -41,27 +41,27 @@ public:
       node->value = value;
       node->next = NULL;
       //Append to q_tail and update the queue
-      pthread_mutex_lock(locks);
+      pthread_mutex_lock(&locks);
       q_tail->next = node;
       q_tail = node;
-      pthread_mutex_unlock(locks);
+      pthread_mutex_unlock(&locks);
     }
 
     bool dequeue(T *value)
     {
 
-        pthread_mutex_lock(locks);
+        pthread_mutex_lock(&locks);
         Node<T>* node = q_head;
         Node<T>* new_head = node->next;
 
         if(new_head==NULL){
-          pthread_mutex_unlock(locks);
+          pthread_mutex_unlock(&locks);
           return false;
 
         }
         *value = new_head->value;
         q_head = new_head;
-        pthread_mutex_unlock(locks);
+        pthread_mutex_unlock(&locks);
         my_allocator_.freeNode(node);
         return true;
     }
