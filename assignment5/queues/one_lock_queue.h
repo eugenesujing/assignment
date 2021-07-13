@@ -39,6 +39,7 @@ public:
       Node<T>* node = (Node<T>* )my_allocator_.newNode();
       node->value = value;
       node->next = NULL;
+      std::cout<<"mutext here = "<<locks<<std::endl;
       //Append to q_tail and update the queue
       pthread_mutex_lock(locks);
       q_tail->next = node;
@@ -49,9 +50,11 @@ public:
     bool dequeue(T *value)
     {
         bool ret_value = false;
+        std::cout<<"mutext here = "<<locks<<std::endl;
         pthread_mutex_lock(locks);
         Node<T>* node = q_head;
         Node<T>* new_head = q_head->next;
+
         if(new_head==NULL){
           pthread_mutex_unlock(locks);
           return false;
