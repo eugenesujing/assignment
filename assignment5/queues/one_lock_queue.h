@@ -50,12 +50,16 @@ public:
     {
         bool ret_value = false;
         pthread_mutex_lock(locks);
-        if(q_head->next!=NULL){
-          Node<T>* node = q_head;
+        Node<T>* node = q_head;
+        Node<T>* new_head = q_head->next;
+        if(new_head!=NULL){
+
           *value = q_head->next->value;
-          q_head = node->next;
+          q_head = new_head;
+
           my_allocator_.freeNode(node);
           ret_value = true;
+
         }
         pthread_mutex_unlock(locks);
         return ret_value;
