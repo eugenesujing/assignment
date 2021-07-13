@@ -28,7 +28,7 @@ public:
         my_allocator_.initialize(t_my_allocator_size, sizeof(Node<T>));
         // Initialize the queue head or tail here
         Node<T>* newNode = (Node<T>*)my_allocator_.newNode();
-        my_allocator_.freeNode(newNode);
+
         newNode->next = NULL;
         q_head = newNode;
         q_tail = newNode;
