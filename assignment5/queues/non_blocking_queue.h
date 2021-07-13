@@ -31,6 +31,7 @@ class Node
 template <class T>
 class NonBlockingQueue
 {
+public:
   pointer_t<Node<T>> q_head;
   pointer_t<Node<T>> q_tail;
     CustomAllocator my_allocator_;
@@ -93,8 +94,9 @@ public:
     bool dequeue(T *value)
     {
         // Use LFENCE and SFENCE as mentioned in pseudocode
+        pointer_t<Node<T>> head;
         while(true){
-             pointer_t<Node<T>> head = q_head
+              head = q_head
              LFENCE;
              pointer_t<Node<T>> tail = q_tail
              LFENCE;
@@ -103,13 +105,13 @@ public:
              if (head == q_head) {
                  if(head.address() == tail.address()) {
                      if(next.address() == NULL)
-                             return FALSE;
+                             return false;
                     Node<T>* p = compute_ptr(next.address(),tail.count()+1);
                     pointer_t<Node<T>> to_be_swapped ={p};
                      CAS(&q_tail, tail, to_be_swapped);	//DLABEL
                  }
                  else {
-                     *p_value = next.address()->value;
+                     *value = next.address()->value;
                      Node<T>* p = compute_ptr(next.address(),head.count()+1);
                      pointer_t<Node<T>> to_be_swapped ={p};
                      if(CAS(&q_head, head, to_be_swapped))
@@ -118,7 +120,7 @@ public:
              }
          }
          my_allocator_.freeNode(head.address());
-         return TRUE;
+         return true;
     }
 
     void cleanup()
