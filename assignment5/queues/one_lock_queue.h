@@ -68,6 +68,7 @@ public:
 
     void cleanup()
     {
+      pthread_mutex_destroy(&locks);
         my_allocator_.cleanup();
     }
 };

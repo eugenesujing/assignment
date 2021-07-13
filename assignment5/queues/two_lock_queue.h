@@ -1,5 +1,5 @@
 #include "../common/allocator.h"
-
+#include <pthread.h>
 pthread_mutex_t lock1 = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t lock2 = PTHREAD_MUTEX_INITIALIZER;
 
@@ -68,6 +68,8 @@ public:
     }
     void cleanup()
     {
+      pthread_mutex_destroy(lock1);
+      pthread_mutex_destroy(lock2);
         my_allocator_.cleanup();
     }
 };
