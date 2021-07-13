@@ -71,19 +71,20 @@ public:
             LFENCE;
             pointer_t<Node<T>> next = tail.address()->next;
             LFENCE;
-            if (&tail == &q_tail){
+            std::cout<<"enque here 0"<<std::endl;
+            if (tail.ptr == q_tail.ptr){
                 if (next.address() == NULL) {
-                  std::cout<<"enque here 1"<<std::endl;
+                //  std::cout<<"enque here 1"<<std::endl;
                   Node<T>* p = compute_ptr(node,next.count()+1);
                   pointer_t<Node<T>> to_be_swapped ={p};
                     if(CAS(&tail.address()->next, next, to_be_swapped)){
-                      std::cout<<"successfully enque "<<value<<std::endl;
+                      //std::cout<<"successfully enque "<<value<<std::endl;
                       break;
                     }
 
                 }
                 else{
-                  std::cout<<"enque here 2"<<std::endl;
+                //  std::cout<<"enque here 2"<<std::endl;
                   Node<T>* p = compute_ptr(next.address(),tail.count()+1);
                   pointer_t<Node<T>> to_be_swapped ={p};
                     CAS(&q_tail, tail, to_be_swapped);	// ELABEL
@@ -107,9 +108,10 @@ public:
              LFENCE;
              pointer_t<Node<T>> next = head.address()->next;
              LFENCE;
-             if (&head == &q_head) {
+             if (head.ptr == q_head.ptr) {
+               //std::cout<<"deque here 0"<<std::end;
                  if(head.address() == tail.address()) {
-                   std::cout<<"deque here 1"<<std::endl;
+                   //std::cout<<"deque here 1"<<std::endl;
                      if(next.address() == NULL)
                              return false;
                     Node<T>* p = compute_ptr(next.address(),tail.count()+1);
@@ -117,12 +119,12 @@ public:
                      CAS(&q_tail, tail, to_be_swapped);	//DLABEL
                  }
                  else {
-                   std::cout<<"deque here 1"<<std::endl;
+                   //std::cout<<"deque here 1"<<std::endl;
                      *value = next.address()->value;
                      Node<T>* p = compute_ptr(next.address(),head.count()+1);
                      pointer_t<Node<T>> to_be_swapped ={p};
                      if(CAS(&q_head, head, to_be_swapped)){
-                       std::cout<<"successfully deque "<<*value<<std::endl;
+                      // std::cout<<"successfully deque "<<*value<<std::endl;
                        break;
                      }
 
