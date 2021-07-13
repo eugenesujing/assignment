@@ -71,7 +71,7 @@ public:
             LFENCE;
             pointer_t<Node<T>> next = tail.address()->next;
             LFENCE;
-            if (tail == q_tail){
+            if (&tail == &q_tail){
                 if (next.address() == NULL) {
                   Node<T>* p = compute_ptr(node,next.count()+1);
                   pointer_t<Node<T>> to_be_swapped ={p};
@@ -96,13 +96,13 @@ public:
         // Use LFENCE and SFENCE as mentioned in pseudocode
         pointer_t<Node<T>> head;
         while(true){
-              head = q_head
+              head = q_head;
              LFENCE;
-             pointer_t<Node<T>> tail = q_tail
+             pointer_t<Node<T>> tail = q_tail;
              LFENCE;
-             pointer_t<Node<T>> next = head.address()->next
+             pointer_t<Node<T>> next = head.address()->next;
              LFENCE;
-             if (head == q_head) {
+             if (&head == &q_head) {
                  if(head.address() == tail.address()) {
                      if(next.address() == NULL)
                              return false;
