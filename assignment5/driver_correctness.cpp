@@ -244,6 +244,7 @@ int main(int argc, char *argv[])
         producers[i].join();
     }
     no_more_enqueues.store(true);
+    std::cout<<"store true"<<std::endl;
     for (int i = 0; i < n_consumers; ++i)
     {
         consumers[i].join();
