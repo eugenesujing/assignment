@@ -58,7 +58,9 @@ public:
 
         while(new_head==NULL){
           if(no_more_enqueues.load()==false){
+            std::cout<<"Start waiting"<<std::endl;
             pthread_cond_wait(&empty,&locks);
+            std::cout<<"Stop waiting"<<std::endl;
           }
           new_head = q_head->next;
           if(new_head!=NULL){
