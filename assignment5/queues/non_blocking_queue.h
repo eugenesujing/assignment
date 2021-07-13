@@ -22,7 +22,7 @@ class pointer_t{
 
 
 template <class T>
-class Node
+struct Node
 {
   T value;
   pointer_t<Node<T>> next;
