@@ -52,16 +52,19 @@ public:
         pthread_mutex_lock(locks);
         Node<T>* node = q_head;
         Node<T>* new_head = q_head->next;
-        if(new_head!=NULL){
-
-          *value = q_head->next->value;
-          q_head = new_head;
-
-          my_allocator_.freeNode(node);
-          ret_value = true;
+        if(new_head==NULL){
+          pthread_mutex_unlock(locks);
+          return false;
 
         }
+        *value = q_head->next->value;
+        q_head = new_head;
+
+
+
         pthread_mutex_unlock(locks);
+        my_allocator_.freeNode(node);
+        ret_value = true;
         return ret_value;
     }
 
