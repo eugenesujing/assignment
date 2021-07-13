@@ -71,7 +71,7 @@ public:
             LFENCE;
             pointer_t<Node<T>> next = tail.address()->next;
             LFENCE;
-            std::cout<<"enque here 0"<<std::endl;
+            //std::cout<<"enque here 0"<<std::endl;
             if (tail.ptr == q_tail.ptr){
                 if (next.address() == NULL) {
                 //  std::cout<<"enque here 1"<<std::endl;

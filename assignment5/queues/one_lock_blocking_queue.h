@@ -1,7 +1,7 @@
 #include "../common/allocator.h"
 #include <pthread.h>
 pthread_mutex_t locks = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t empty = PTHREAD_COND_INITIALIZER;
+//pthread_cond_t empty = PTHREAD_COND_INITIALIZER;
 template <class T>
 struct Node
 {
@@ -88,7 +88,7 @@ public:
     void cleanup()
     {
       pthread_mutex_destroy(&locks);
-      pthread_cond_destroy(&empty);
+      //pthread_cond_destroy(&empty);
         my_allocator_.cleanup();
     }
 };
