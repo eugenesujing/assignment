@@ -57,7 +57,7 @@ public:
           return false;
 
         }
-        *value = q_head->next->value;
+        *value = new_head->value;
         q_head = new_head;
 
 
