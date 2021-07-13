@@ -1,7 +1,7 @@
 #include "../common/allocator.h"
 #include <pthread.h>
 
-extern pthread_mutex_t* locks;
+pthread_mutex_t* locks = new pthread_mutex_t;
 
 template <class T>
 struct Node
@@ -31,7 +31,7 @@ public:
         newNode->next = NULL;
         q_head = newNode;
         q_tail = newNode;
-        pthread_mutex_t* locks = new pthread_mutex_t;
+
     }
 
     void enqueue(T value)
@@ -70,7 +70,6 @@ public:
 
     void cleanup()
     {
-      delete locks;
         my_allocator_.cleanup();
     }
 };
