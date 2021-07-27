@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <pthread.h>
 #include <stdlib.h>
+#include <mpi.h>
 
 #define sqr(x) ((x) * (x))
 #define DEFAULT_NUMBER_OF_THREADS "1"
@@ -66,10 +67,10 @@ int main(int argc, char *argv[]) {
   }
   if(world_rank==0){
     printf("Number of processes : %d",world_size);
-    printf("Number of points : %ul\n",n_points);
+    printf("Number of points : %lu\n",n_points);
     printf("Major Radius : %f\n",maj_radius);
     printf("Minor Radius : %f\n",min_radius);
-    printf("Random Seed : %ud\n",r_seed);
+    printf("Random Seed : %d\n",r_seed);
   }
   timer global_timer;
   global_timer.start();
@@ -100,7 +101,7 @@ int main(int argc, char *argv[]) {
 
   if(world_rank == 0){
     printf("rank, points_generated, ellipse_points, time_taken\n" );
-    printf("%d, %ul, %ul, %f", world_rank, n, ellipse_count, time);
+    printf("%d, %lu, %lu, %f", world_rank, n, ellipse_count, time);
     unsigned long local_count = 0;
     for(int j=1; j<world_size; j++){
       MPI_Recv(&local_count, 1, MPI_UNSIGNED_LONG, j, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -118,7 +119,7 @@ int main(int argc, char *argv[]) {
               << global_time << "\n";
   }else{
     MPI_Send(&ellipse_count, 1, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD);
-    printf("%d, %ul, %ul, %f", world_rank, n, ellipse_count, time);
+    printf("%d, %lu, %lu, %f", world_rank, n, ellipse_count, time);
   }
   MPI_Finalize();
   return 0;
