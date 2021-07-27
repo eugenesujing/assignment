@@ -4,7 +4,6 @@
 #include <iomanip>
 #include <iostream>
 #include <cstdio>
-#include <pthread.h>
 #include <stdlib.h>
 #include <mpi.h>
 
