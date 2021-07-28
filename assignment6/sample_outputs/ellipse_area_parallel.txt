@@ -13,4 +13,3 @@ Total points generated : 1000000000
 Total points in ellipse : 785397648
 Result : 10.995566884747
 Time taken (in seconds) : 11.756
-

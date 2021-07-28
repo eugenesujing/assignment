@@ -14,14 +14,7 @@
 #define DEFAULT_MINOR_RADIUS "1"
 #define DEFAULT_RANDOM_SEED "1"
 
-struct argument{
-    unsigned long n_this_thread;
-    uint random_seed;
-    float maj_radius;
-    float min_radius;
-    unsigned long count;
-    double time;
-};
+
 
 uint c_const = (uint)RAND_MAX + (uint)1;
 inline double get_random_coordinate(uint *random_seed) {
