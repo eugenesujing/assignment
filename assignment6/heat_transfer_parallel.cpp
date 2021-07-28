@@ -215,14 +215,14 @@ int main(int argc, char *argv[]) {
        // print process statistics and other results
        printf("%d, %d, %d, %g\n", world_rank, startx, endx, time_taken);
 
-       printf("Temp[%d,%d]=%g\n",0,0,T->temp(0,0));
+       std::cout << "Temp[" << 0 << "," << 0 << "]=" << T->temp(0,0) << "\n";
        for(int i= 1; i <5; i++){
          int index = i*(grid_size/5);
          if(index <= endx && index >=startx){
-           printf("Temp[%d,%d]=%g\n",index,index,T->temp(index,index));
+           std::cout << "Temp[" << index << "," << index << "]=" << T->temp(index, index) << "\n";
          }
        }
-       printf("Temp[%d,%d]=%g\n",endx,endx,T->temp(endx,endx));
+       std::cout << "Temp[" << endx << "," << endx << "]=" << T->temp(endx,endx) << "\n";
 
   }
   else{
@@ -231,10 +231,10 @@ int main(int argc, char *argv[]) {
       for(int i= 1; i <5; i++){
         int index = i*(grid_size/5);
         if(index <= endx && index >=startx){
-          printf("Temp[%d,%d]=%g\n",index,index,T->temp(index,index));
+          std::cout << "Temp[" << index << "," << index << "]=" << T->temp(index, index) << "\n";
         }
       }
-      printf("Temp[%d,%d]=%g\n",endx,endx,T->temp(endx,endx));
+      std::cout << "Temp[" << endx << "," << endx << "]=" << T->temp(endx,endx) << "\n";
    }
 
 
