@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
 	return 1;
   }
   if(world_rank == 0){
-    std::cout << "Number of threads : " << world_size <<"\n";
+    std::cout << "Number of processes : " << world_size <<"\n";
     std::cout << "Grid Size : " << grid_size << "x" << grid_size << "\n";
 
     std::cout << "Cx : " << Cx << "\n" << "Cy : " << Cy << "\n";
@@ -166,7 +166,7 @@ int main(int argc, char *argv[]) {
    int local_stepcount;
    timer t1;
    t1.start();
-   for(local_stepcount = 1; local_stepcount < steps; local_stepcount++) {
+   for(local_stepcount = 0; local_stepcount < steps; local_stepcount++) {
     //Compute the Temperature Array values Curr[][] in the slice allocated to this thread from Prev[][]
     for (uint x = startx; x <= endx; x++) {
 		  for (uint y = 0; y < grid_size; y++) {
