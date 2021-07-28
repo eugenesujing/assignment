@@ -70,6 +70,7 @@ int main(int argc, char *argv[]) {
     printf("Major Radius : %f\n",maj_radius);
     printf("Minor Radius : %f\n",min_radius);
     printf("Random Seed : %d\n",r_seed);
+    printf("rank, points_generated, ellipse_points, time_taken\n" );
   }
   timer global_timer;
   global_timer.start();
@@ -99,7 +100,7 @@ int main(int argc, char *argv[]) {
   unsigned long global_count = ellipse_count;
 
   if(world_rank == 0){
-    printf("rank, points_generated, ellipse_points, time_taken\n" );
+
     printf("%d, %lu, %lu, %f\n", world_rank, n, ellipse_count, time);
     unsigned long local_count = 0;
     for(int j=1; j<world_size; j++){
