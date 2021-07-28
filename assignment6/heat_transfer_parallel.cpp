@@ -213,35 +213,35 @@ int main(int argc, char *argv[]) {
 
   if(world_rank == 0){
        // print process statistics and other results
-       printf("%d, %d, %d, %f\n", world_rank, startx, endx, time_taken);
+       printf("%d, %d, %d, %g\n", world_rank, startx, endx, time_taken);
 
-       printf("Temp[%d,%d]=%f\n",0,0,T->temp(0,0));
+       printf("Temp[%d,%d]=%g\n",0,0,T->temp(0,0));
        for(int i= 1; i <5; i++){
          int index = i*(grid_size/5);
          if(index <= endx && index >=startx){
-           printf("Temp[%d,%d]=%f\n",index,index,T->temp(index,index));
+           printf("Temp[%d,%d]=%g\n",index,index,T->temp(index,index));
          }
        }
-       printf("Temp[%d,%d]=%f\n",endx,endx,T->temp(endx,endx));
+       printf("Temp[%d,%d]=%g\n",endx,endx,T->temp(endx,endx));
 
   }
   else{
       // print process statistics and relevant point temperatures
-      printf("%d, %d, %d, %f\n", world_rank, startx, endx, time_taken);
+      printf("%d, %d, %d, %g\n", world_rank, startx, endx, time_taken);
       for(int i= 1; i <5; i++){
         int index = i*(grid_size/5);
         if(index <= endx && index >=startx){
-          printf("Temp[%d,%d]=%f\n",index,index,T->temp(index,index));
+          printf("Temp[%d,%d]=%g\n",index,index,T->temp(index,index));
         }
       }
-      printf("Temp[%d,%d]=%f\n",endx,endx,T->temp(endx,endx));
+      printf("Temp[%d,%d]=%g\n",endx,endx,T->temp(endx,endx));
    }
 
 
   delete T;
   if(world_rank == 0){
     double global_time = global_timer.stop();
-    printf("Time taken (in seconds) : %f\n", global_time);
+    printf("Time taken (in seconds) : %g\n", global_time);
   }
   MPI_Finalize();
   return 0;
