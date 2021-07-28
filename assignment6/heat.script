@@ -6,4 +6,4 @@
 #SBATCH --partition=slow
 #SBATCH --mem=10G
 
-srun ./heat_transfer_parallel
+srun ./heat_transfer_parallel --iCX 0.1 --iCY 0.15 --tSteps 4000 --gSize 1000 --mTemp 600
