@@ -104,6 +104,7 @@ int main(int argc, char *argv[]) {
 
   PageRankType *pr_curr = new PageRankType[g.n_];
   PageRankType *pr_next = new PageRankType[g.n_];
+  PageRankType global_sum = 0;
   for (uintV i = 0; i < g.n_; i++) {
     pr_curr[i] = INIT_PAGE_RANK;
     pr_next[i] = 0.0;
@@ -193,8 +194,8 @@ int main(int argc, char *argv[]) {
   //---synchronization phase 2 start---
   if(strategy == 1){
     if(world_rank == 0){
-      PageRankType global_sum = 0;
-      PageRankType tempSum = 0;
+
+      PageRankType tempSum = local_sum;
       printf("%d, %d, %f\n", world_rank, edgesProcessed, communication_time);
       for(int c=1; c<world_size; c++){
         //receive local sum value from other processes
@@ -202,22 +203,16 @@ int main(int argc, char *argv[]) {
         global_sum += tempSum;
 
       }
-      printf("Sum of page rank : %f\n",global_sum);
-      printf("Time taken (in seconds) : %f\n",t0.stop());
     }else{
-      MPI_Send(&local_sum, 1, MPI_DOUBLE, 0, world_rank, MPI_COMM_WORLD);
       printf("%d, %d, %f\n", world_rank, edgesProcessed, communication_time);
+      MPI_Send(&local_sum, 1, MPI_DOUBLE, 0, world_rank, MPI_COMM_WORLD);
+
     }
   }else{
     printf("%d, %d, %f\n", world_rank, edgesProcessed, communication_time);
-    PageRankType global_sum = 0;
     MPI_Reduce(&local_sum, &global_sum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
-    if(world_rank == 0){
 
-      printf("Sum of page rank : %f\n",global_sum);
-      printf("Time taken (in seconds) : %f\n",t0.stop());
-    }
   }
 
   //---synchronization phase 2 end---
@@ -225,6 +220,11 @@ int main(int argc, char *argv[]) {
   delete[] end;
   delete[] pr_curr;
   delete[] pr_next;
+  if(world_rank == 0){
+
+    printf("Sum of page rank : %f\n",global_sum);
+    printf("Time taken (in seconds) : %f\n",t0.stop());
+  }
   MPI_Finalize();
   return 0;
 }
