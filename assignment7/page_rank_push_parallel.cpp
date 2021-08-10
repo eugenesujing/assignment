@@ -149,7 +149,7 @@ int main(int argc, char *argv[]) {
       }
     }else if(strategy==2){
       MPI_Reduce(pr_next, pr_next, g.n_, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-      MPI_Scatterv(pr_next, *countArray, *start, MPI_DOUBLE, pr_next+start[world_rank], countArray[world_rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Scatterv(pr_next, countArray, start, MPI_DOUBLE, pr_next+start[world_rank], countArray[world_rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
     }else{
       //strategy 3
       for(int r=0; r < world_size; r++){
