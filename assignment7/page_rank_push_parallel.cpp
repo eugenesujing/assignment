@@ -156,8 +156,18 @@ int main(int argc, char *argv[]) {
     }else{
       //strategy 3
       for(int r=0; r < world_size; r++){
+        PageRankType* temp = NULL;
+        if(r == world_rank){
+          temp = new PageRankType[countArray[r]];
+        }
 
-        MPI_Reduce(pr_next+start[r], pr_next+start[r], countArray[r], MPI_DOUBLE, MPI_SUM, r, MPI_COMM_WORLD);
+        MPI_Reduce(pr_next+start[r], temp, countArray[r], MPI_DOUBLE, MPI_SUM, r, MPI_COMM_WORLD);
+        if(r == world_rank){
+          for(int d = 0; d <countArray[r]; d++){
+            pr_next[start[r]+d] = temp[d];
+          }
+          delete[] temp;
+        }
       }
 
     }
@@ -183,28 +193,28 @@ int main(int argc, char *argv[]) {
       if(world_rank == 0){
         PageRankType global_sum = 0;
         PageRankType tempSum = 0;
-        printf("%d, %d, %f", world_rank, edgesProcessed, communication_time);
+        printf("%d, %d, %f\n", world_rank, edgesProcessed, communication_time);
         for(int c=1; c<world_size; c++){
           //receive local sum value from other processes
           MPI_Recv(&tempSum, 1, MPI_DOUBLE, c, c, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
           global_sum += tempSum;
 
         }
-        printf("Sum of page rank : %f",global_sum);
-        printf("Time taken (in seconds) : %f",t0.stop());
+        printf("Sum of page rank : %f\n",global_sum);
+        printf("Time taken (in seconds) : %f\n",t0.stop());
       }else{
         MPI_Send(&local_sum, 1, MPI_DOUBLE, 0, world_rank, MPI_COMM_WORLD);
-        printf("%d, %d, %f", world_rank, edgesProcessed, communication_time);
+        printf("%d, %d, %f\n", world_rank, edgesProcessed, communication_time);
       }
     }else{
-      printf("%d, %d, %f", world_rank, edgesProcessed, communication_time);
+      printf("%d, %d, %f\n", world_rank, edgesProcessed, communication_time);
       PageRankType global_sum = 0;
       MPI_Reduce(&local_sum, &global_sum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
       if(world_rank == 0){
 
-        printf("Sum of page rank : %f",global_sum);
-        printf("Time taken (in seconds) : %f",t0.stop());
+        printf("Sum of page rank : %f\n",global_sum);
+        printf("Time taken (in seconds) : %f\n",t0.stop());
       }
     }
 
