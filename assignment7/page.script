@@ -6,4 +6,4 @@
 #SBATCH --partition=slow
 #SBATCH --mem=10G
 
-srun ./page_rank_push_parallel --nIterations 10 --inputFile /input_graphs/web-Google --strategy 1
+srun ./page_rank_push_parallel --nIterations 10 --inputFile input_graphs/web-Google --strategy 1
