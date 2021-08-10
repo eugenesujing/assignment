@@ -1,0 +1,4 @@
+$ python scripts/page_rank_tester.pyc --execPath=. --scriptPath=scripts/page_rank_evaluator.pyc --inputPath=input_graphs/
+./page_rank_pull_parallel --nThreads 4 --nIterations 10 --inputFile /input_graphs/web-Google --strategy 2
+scp -P 24 -r assignment6/ jsa306@cs-cloud.cs.surrey.sfu.ca:/home/jsa306/
+ssh -p 24 jsa306@cs-cloud.cs.surrey.sfu.ca
