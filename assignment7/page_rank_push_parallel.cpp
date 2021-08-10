@@ -11,12 +11,14 @@
 #ifdef USE_INT
 #define INIT_PAGE_RANK 100000
 #define EPSILON 1000
+#define MPI_PAGERANK_TYPE MPI_LONG
 #define PAGE_RANK(x) (15000 + (5 * x) / 6)
 #define CHANGE_IN_PAGE_RANK(x, y) std::abs(x - y)
 typedef int64_t PageRankType;
 #else
 #define INIT_PAGE_RANK 1.0
 #define EPSILON 0.01
+#define MPI_PAGERANK_TYPE MPI_DOUBLE
 #define DAMPING 0.85
 #define PAGE_RANK(x) (1 - DAMPING + DAMPING * x)
 #define CHANGE_IN_PAGE_RANK(x, y) std::fabs(x - y)
@@ -133,7 +135,7 @@ int main(int argc, char *argv[]) {
         for(int c=1; c<world_size; c++){
 
           //receive next page value from other processes
-          MPI_Recv(temp, g.n_, MPI_DOUBLE, c, c, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+          MPI_Recv(temp, g.n_, MPI_PAGERANK_TYPE, c, c, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
           for(int d=0; d<g.n_; d++){
             pr_next[d] +=temp[d];
           }
@@ -142,17 +144,17 @@ int main(int argc, char *argv[]) {
         delete[] temp;
         //send the aggreated results to other processes
         for(int c=1; c<world_size; c++){
-          MPI_Send(pr_next+start[c], countArray[c], MPI_DOUBLE, c, c, MPI_COMM_WORLD);
+          MPI_Send(pr_next+start[c], countArray[c], MPI_PAGERANK_TYPE, c, c, MPI_COMM_WORLD);
         }
       }else{
-        MPI_Send(pr_next, g.n_, MPI_DOUBLE, 0, world_rank, MPI_COMM_WORLD);
-        MPI_Recv(pr_next+start[world_rank], end[world_rank]-start[world_rank], MPI_DOUBLE, 0, world_rank, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Send(pr_next, g.n_, MPI_PAGERANK_TYPE, 0, world_rank, MPI_COMM_WORLD);
+        MPI_Recv(pr_next+start[world_rank], end[world_rank]-start[world_rank], MPI_PAGERANK_TYPE, 0, world_rank, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
       }
     }else if(strategy==2){
       PageRankType* temp = new PageRankType[g.n_];
-      MPI_Reduce(pr_next, temp, g.n_, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+      MPI_Reduce(pr_next, temp, g.n_, MPI_PAGERANK_TYPE, MPI_SUM, 0, MPI_COMM_WORLD);
       //printf("first reduce succeded");
-      MPI_Scatterv(temp, countArray, start, MPI_DOUBLE, pr_next+start[world_rank], countArray[world_rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Scatterv(temp, countArray, start, MPI_PAGERANK_TYPE, pr_next+start[world_rank], countArray[world_rank], MPI_PAGERANK_TYPE, 0, MPI_COMM_WORLD);
       delete[] temp;
     }else{
       //strategy 3
@@ -162,7 +164,7 @@ int main(int argc, char *argv[]) {
           temp = new PageRankType[countArray[r]];
         }
 
-        MPI_Reduce(pr_next+start[r], temp, countArray[r], MPI_DOUBLE, MPI_SUM, r, MPI_COMM_WORLD);
+        MPI_Reduce(pr_next+start[r], temp, countArray[r], MPI_PAGERANK_TYPE, MPI_SUM, r, MPI_COMM_WORLD);
         if(r == world_rank){
           for(int d = 0; d <countArray[r]; d++){
             pr_next[start[r]+d] = temp[d];
@@ -200,18 +202,18 @@ int main(int argc, char *argv[]) {
       printf("%d, %d, %f\n", world_rank, edgesProcessed, communication_time);
       for(int c=1; c<world_size; c++){
         //receive local sum value from other processes
-        MPI_Recv(&tempSum, 1, MPI_DOUBLE, c, c, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(&tempSum, 1, MPI_PAGERANK_TYPE, c, c, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         global_sum += tempSum;
 
       }
     }else{
       printf("%d, %d, %f\n", world_rank, edgesProcessed, communication_time);
-      MPI_Send(&local_sum, 1, MPI_DOUBLE, 0, world_rank, MPI_COMM_WORLD);
+      MPI_Send(&local_sum, 1, MPI_PAGERANK_TYPE, 0, world_rank, MPI_COMM_WORLD);
 
     }
   }else{
     printf("%d, %d, %f\n", world_rank, edgesProcessed, communication_time);
-    MPI_Reduce(&local_sum, &global_sum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce(&local_sum, &global_sum, 1, MPI_PAGERANK_TYPE, MPI_SUM, 0, MPI_COMM_WORLD);
 
 
   }
