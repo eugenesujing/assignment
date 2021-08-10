@@ -77,6 +77,7 @@ int main(int argc, char *argv[]) {
     #endif
       std::cout << std::fixed;
       std::cout << "World Size : " << world_size << "\n";
+      std::cout << "Communication strategy : " <<strategy <<"\n";
       std::cout << "Iterations: " << max_iterations << "\n";
       std::cout <<"rank, num_edges, communication_time\n";
   }
