@@ -149,7 +149,7 @@ int main(int argc, char *argv[]) {
       }
     }else if(strategy==2){
       MPI_Reduce(pr_next, pr_next, g.n_, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-      MPI_Scatterv(pr_next, *countArray, *start, MPI_DOUBLE, pr_next+start[world_rank], count[world_rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Scatterv(pr_next, *countArray, *start, MPI_DOUBLE, pr_next+start[world_rank], countArray[world_rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
     }else{
       //strategy 3
       for(int r=0; r < world_size; r++){
@@ -179,12 +179,12 @@ int main(int argc, char *argv[]) {
     if(strategy == 1){
       if(world_rank == 0){
         PageRankType global_sum = 0;
-        PageRankType temp = 0;
+        PageRankType tempSum = 0;
         printf("%d, %d, %f", world_rank, edgesProcessed, communication_time);
         for(int c=1; c<world_size; c++){
           //receive local sum value from other processes
-          MPI_Recv(temp, 1, MPI_DOUBLE, c, c, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-          global_sum += temp;
+          MPI_Recv(&tempSum, 1, MPI_DOUBLE, c, c, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+          global_sum += tempSum;
 
         }
         printf("Sum of page rank : %f",global_sum);
