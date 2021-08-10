@@ -224,8 +224,11 @@ int main(int argc, char *argv[]) {
   delete[] pr_curr;
   delete[] pr_next;
   if(world_rank == 0){
-
-    printf("Sum of page rank : %f\n",global_sum);
+    #ifdef USE_INT
+      printf("Sum of page rank : %ld\n",global_sum);
+    #else
+      printf("Sum of page rank : %f\n",global_sum);
+    #endif
     printf("Time taken (in seconds) : %f\n",t0.stop());
   }
   MPI_Finalize();
