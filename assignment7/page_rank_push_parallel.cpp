@@ -195,7 +195,8 @@ int main(int argc, char *argv[]) {
   if(strategy == 1){
     if(world_rank == 0){
 
-      PageRankType tempSum = local_sum;
+      PageRankType tempSum = 0;
+      global_sum = local_sum;
       printf("%d, %d, %f\n", world_rank, edgesProcessed, communication_time);
       for(int c=1; c<world_size; c++){
         //receive local sum value from other processes
