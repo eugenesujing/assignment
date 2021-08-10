@@ -1,4 +1,5 @@
 #include "core/utils.h"
+#include "core/graph.h"
 #include "core/cxxopts.h"
 #include "core/get_time.h"
 #include <mpi.h>
@@ -21,8 +22,7 @@ typedef int64_t PageRankType;
 #define CHANGE_IN_PAGE_RANK(x, y) std::fabs(x - y)
 typedef double PageRankType;
 #endif
-
-
+#define DEFAULT_STRATEGY "1"
 
 int main(int argc, char *argv[]) {
   timer t0;
@@ -111,9 +111,9 @@ int main(int argc, char *argv[]) {
   double communication_time = 0.0;
   uintE edgesProcessed = 0;
   timer t1;
-  uintV* count = new uintv[world_size];
+  uintV* countArray = new uintV[world_size];
   for(int i=0; i<world_size; i++){
-    count[i] = end[i] - start[i];
+    countArray[i] = end[i] - start[i];
   }
   for(int i=0; i<max_iterations; i++){
     for(uintV j = start[world_rank]; j < end[world_rank]; j++ ){
@@ -149,12 +149,12 @@ int main(int argc, char *argv[]) {
       }
     }else if(strategy==2){
       MPI_Reduce(pr_next, pr_next, g.n_, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-      MPI_Scatterv(pr_next, *count, *start, MPI_DOUBLE, pr_next+start[world_rank], count[world_rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Scatterv(pr_next, *countArray, *start, MPI_DOUBLE, pr_next+start[world_rank], count[world_rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
     }else{
       //strategy 3
       for(int r=0; r < world_size; r++){
 
-        MPI_Reduce(pr_next+start[r], pr_next+start[r], count[r], MPI_DOUBLE, MPI_SUM, r, MPI_COMM_WORLD);
+        MPI_Reduce(pr_next+start[r], pr_next+start[r], countArray[r], MPI_DOUBLE, MPI_SUM, r, MPI_COMM_WORLD);
       }
 
     }
@@ -190,8 +190,8 @@ int main(int argc, char *argv[]) {
         printf("Sum of page rank : %f",global_sum);
         printf("Time taken (in seconds) : %f",t0.stop());
       }else{
-        MPI_Send(local_sum, 1, MPI_DOUBLE, 0, world_rank, MPI_COMM_WORLD);
-        printf(%d, %d, %f, world_rank, edgesProcessed, communication_time);
+        MPI_Send(&local_sum, 1, MPI_DOUBLE, 0, world_rank, MPI_COMM_WORLD);
+        printf("%d, %d, %f", world_rank, edgesProcessed, communication_time);
       }
     }else{
       printf("%d, %d, %f", world_rank, edgesProcessed, communication_time);
