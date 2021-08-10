@@ -148,8 +148,11 @@ int main(int argc, char *argv[]) {
         MPI_Recv(pr_next+start[world_rank], end[world_rank]-start[world_rank], MPI_DOUBLE, 0, world_rank, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
       }
     }else if(strategy==2){
-      MPI_Reduce(pr_next, pr_next, g.n_, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-      MPI_Scatterv(pr_next, countArray, start, MPI_DOUBLE, pr_next+start[world_rank], countArray[world_rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      PageRankType* temp = new PageRankType[g.n_];
+      MPI_Reduce(pr_next, temp, g.n_, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+      //printf("first reduce succeded");
+      MPI_Scatterv(temp, countArray, start, MPI_DOUBLE, pr_next+start[world_rank], countArray[world_rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      delete[] temp;
     }else{
       //strategy 3
       for(int r=0; r < world_size; r++){
@@ -197,6 +200,7 @@ int main(int argc, char *argv[]) {
       printf("%d, %d, %f", world_rank, edgesProcessed, communication_time);
       PageRankType global_sum = 0;
       MPI_Reduce(&local_sum, &global_sum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+
       if(world_rank == 0){
 
         printf("Sum of page rank : %f",global_sum);
