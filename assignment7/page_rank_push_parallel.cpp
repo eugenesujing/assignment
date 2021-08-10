@@ -142,7 +142,7 @@ int main(int argc, char *argv[]) {
         delete[] temp;
         //send the aggreated results to other processes
         for(int c=1; c<world_size; c++){
-          MPI_Send(pr_next+start[world_rank], end[world_rank]-start[world_rank], MPI_DOUBLE, c, c, MPI_COMM_WORLD);
+          MPI_Send(pr_next+start[c], countArray[c], MPI_DOUBLE, c, c, MPI_COMM_WORLD);
         }
       }else{
         MPI_Send(pr_next, g.n_, MPI_DOUBLE, 0, world_rank, MPI_COMM_WORLD);
